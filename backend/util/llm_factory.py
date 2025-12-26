@@ -19,6 +19,7 @@ from langchain_core.prompts import (
 
 import util.constants as constants
 
+
 class LLMFactory:
 
     @staticmethod
@@ -88,12 +89,13 @@ class LLMFactory:
             )
         elif model_name == constants.gemini_llm:
             return ChatGoogleGenerativeAI(
-                api_key=api_key, model=model_name, temperature=temperature, transport="rest"
+                api_key=api_key,
+                model=model_name,
+                temperature=temperature,
+                transport="rest",
             )
         elif model_name == constants.groq_llm:
-            return ChatGroq(
-                api_key=api_key, model=model_name, temperature=temperature
-            )
+            return ChatGroq(api_key=api_key, model=model_name, temperature=temperature)
         else:
             raise ValueError(f"Unsupported model: {model_name}")
 
@@ -102,7 +104,7 @@ class LLMFactory:
         system_prompt: str = None,
         human_message: str = None,
         temperature=0.3,
-        local_llm=False
+        local_llm=False,
     ):
         """
         Invokes the LLM with given prompts using ChatPromptTemplate.

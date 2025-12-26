@@ -1,5 +1,4 @@
 from typing import List
-
 from pydantic_settings import BaseSettings
 
 
@@ -17,8 +16,16 @@ class Settings(BaseSettings):
 
     PROJECT_NAME: str = "SQL Query Generator Platform APIs"
 
+    DATABASE_URL: str
+    GOOGLE_API_KEY: str
+
+    # Optional / legacy
+    gemini_api_key: str | None = None
+    llm_provider: str | None = None
+
     class Config:
         case_sensitive = True
+        env_file = ".env"
 
 
 settings = Settings()

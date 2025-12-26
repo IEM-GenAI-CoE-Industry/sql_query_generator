@@ -1,5 +1,7 @@
 import sys
 from pathlib import Path
+import uvicorn
+
 
 file = Path(__file__).resolve()
 parent, root = file.parent, file.parents[1]
@@ -56,7 +58,8 @@ app.include_router(root_router)
 
 
 if __name__ == "__main__":
-    import uvicorn
+    
+    
 
     uvicorn.run(
         app,

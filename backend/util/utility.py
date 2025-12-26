@@ -60,7 +60,7 @@ class Utility:
             raise ValueError(f"Unsupported file type: {extension}")
 
         return documents
-    
+
     @staticmethod
     def clean_text(content: str, preserve_paragraphs: bool = False) -> str:
         """

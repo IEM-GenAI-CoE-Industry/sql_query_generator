@@ -1,18 +1,16 @@
+from typing import Optional, Dict, Any
+import json
+
 from util.llm_factory import LLMFactory
-from util.system_prompt import prompt_generate_summary
+from util.system_prompt import (
+    prompt_generate_summary,
+    prompt_sql_query_generator,
+)
 
 
-from typing import Optional
-
-def generate_summary(text: str, local_llm = False) -> Optional[str]:
+def generate_summary(text: str, local_llm: bool = False) -> Optional[str]:
     """
     Generates a summary of the given text using the LLM.
-
-    Args:
-        text: The input text to summarize
-
-    Returns:
-        The generated summary or None if generation fails
     """
     if not text or not text.strip():
         return None
@@ -29,4 +27,56 @@ def generate_summary(text: str, local_llm = False) -> Optional[str]:
     except Exception as e:
         # Log the error appropriately
         print(f"Error generating summary: {e}")
+        return None
+
+
+def generate_sql_agent_output(
+    question: str,
+    schema: Optional[str] = None,
+    local_llm: bool = False,
+) -> Optional[Dict[str, Any]]:
+    """
+    Core SQL agent logic: calls LLM with SQL-specific system prompt and
+    returns a parsed dict: {"sql": "...", "reasoning": "..."}.
+    """
+    if not question or not question.strip():
+        return None
+
+    # Build a human message including schema if provided
+    if schema:
+        human_message = (
+            f"User question:\n{question}\n\n"
+            f"Database schema:\n{schema}\n\n"
+            "Generate ONLY the JSON object with 'sql' and 'reasoning'."
+        )
+    else:
+        human_message = (
+            f"User question:\n{question}\n\n"
+            "Generate ONLY the JSON object with 'sql' and 'reasoning'."
+        )
+
+    try:
+        response = LLMFactory.invoke(
+            system_prompt=prompt_sql_query_generator,
+            human_message=human_message,
+            temperature=0.2,  # more deterministic for SQL
+            local_llm=local_llm,
+        )
+
+        raw_text = response.content.strip()
+        data = json.loads(raw_text)
+
+        sql = data.get("sql", "").strip()
+        reasoning = data.get("reasoning", "").strip()
+
+        if not sql:
+            raise ValueError("Model did not return a 'sql' field")
+
+        return {
+            "sql": sql,
+            "reasoning": reasoning,
+        }
+
+    except Exception as e:
+        print(f"Error generating SQL: {e}")
         return None
